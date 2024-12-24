@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KaisarionBot.Interactions;
+using KaisarionBot.Interactions.View;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -31,14 +32,19 @@ public class InteractionRunner(HttpRequest request, ILogger logger)
 					await HelpInteraction.Run(chatId, logger);
 					break;
 
-				case var t when text.StartsWith("/agregar"):
+				case var t when text.StartsWith("/agregar", StringComparison.OrdinalIgnoreCase):
 					var addInteraction = new AddInteraction(logger);
 					await addInteraction.Run(chatId, t);
 					break;
 
-				case var t when text.StartsWith("/ver"):
-					var viewInteraction = new ViewInteraction(logger);
-					await viewInteraction.Run(chatId);
+				case var t when text.StartsWith("/vergerson", StringComparison.OrdinalIgnoreCase):
+					var viewInteractionGerson = new ViewInteraction(logger);
+					await viewInteractionGerson.Run(chatId, t, User.Gerson);
+					break;
+
+				case var t when text.StartsWith("/verjaje", StringComparison.OrdinalIgnoreCase):
+					var viewInteractionJaje = new ViewInteraction(logger);
+					await viewInteractionJaje.Run(chatId, t, User.Jaje);
 					break;
 
 				default:
