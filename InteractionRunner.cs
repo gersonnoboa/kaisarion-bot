@@ -17,6 +17,8 @@ public class InteractionRunner(HttpRequest request, ILogger logger)
 		using JsonDocument jsonDoc = JsonDocument.Parse(requestBody);
 		JsonElement root = jsonDoc.RootElement;
 
+		logger.LogWarning($"Received payload: {root.ToString()}");
+
 		if (root.TryGetProperty("message", out JsonElement messageElement))
 		{
 			var text = messageElement.GetProperty("text").GetString() ?? throw new Exception();
