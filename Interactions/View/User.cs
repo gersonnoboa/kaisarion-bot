@@ -7,5 +7,11 @@ public class User
 
 	public static User Gerson => new("5172080", "Gerson");
 	public static User Jaje => new("", "Jaje");
+
+	public static User From(string id)
+	{
+		if (id == Gerson.ChatId) return Gerson;
+		else return Jaje;
+	}
 }
 

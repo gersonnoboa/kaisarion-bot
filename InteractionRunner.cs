@@ -22,7 +22,8 @@ public class InteractionRunner(HttpRequest request, ILogger logger)
 		if (root.TryGetProperty("message", out JsonElement messageElement))
 		{
 			var text = messageElement.GetProperty("text").GetString() ?? throw new Exception();
-			string chatId = messageElement.GetProperty("chat").GetProperty("id").GetRawText();
+			var chatId = messageElement.GetProperty("chat").GetProperty("id").GetRawText();
+			var userId = messageElement.GetProperty("from").GetProperty("id").GetRawText() ?? throw new Exception();
 
 			switch (text)
 			{
@@ -35,8 +36,10 @@ public class InteractionRunner(HttpRequest request, ILogger logger)
 					break;
 
 				case var t when text.StartsWith("/agregar", StringComparison.OrdinalIgnoreCase):
+					var user = User.From(userId);
+
 					var addInteraction = new AddInteraction(logger);
-					await addInteraction.Run(chatId, t);
+					await addInteraction.Run(chatId, t, user);
 					break;
 
 				case var t when text.StartsWith("/vergerson", StringComparison.OrdinalIgnoreCase):
