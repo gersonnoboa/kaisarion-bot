@@ -9,7 +9,7 @@ class DatabaseHandler(ILogger logger)
 	private readonly string TableName = "Links";
 	private readonly string ConnectionString = Environment.GetEnvironmentVariable("KAISARION_BOT_CONNECTION_STRING") ?? throw new Exception();
 
-	public async Task<bool> AddToDatabase(string url, User sourceUser, User targetUser)
+	public async Task<bool> Insert(string url, User sourceUser, User targetUser)
 	{
 		try
 		{
@@ -34,6 +34,38 @@ class DatabaseHandler(ILogger logger)
 			return false;
 		}
 	}
+
+	public async Task<List<string>?> Select(User targetUser)
+	{
+		try
+		{
+			using var connection = new SqlConnection(ConnectionString);
+			await connection.OpenAsync();
+
+			var query = $"SELECT [{LinksTable.LinkColumnName}]"
+			+ $" FROM [dbo].[{LinksTable.Name}]"
+			+ $" WHERE [{LinksTable.TargetUserIdColumnName}] = @{LinksTable.TargetUserIdColumnName}"
+			+ $" ORDER BY [{LinksTable.CreationDateColumnName}] ASC";
+
+			using var command = new SqlCommand(query, connection);
+			command.Parameters.AddWithValue($"@{LinksTable.TargetUserIdColumnName}", targetUser.ChatId);
+
+			using var reader = await command.ExecuteReaderAsync();
+			var result = new List<string>();
+			while (await reader.ReadAsync())
+			{
+				result.Add(reader.GetString(0));
+			}
+
+			return result;
+
+		}
+		catch (Exception ex)
+		{
+			logger.LogWarning($"Error writing to database: {ex.Message}");
+			return null;
+		}
+	}
 }
 
 class LinksTable
@@ -42,4 +74,5 @@ class LinksTable
 	public static readonly string SourceUserIdColumnName = "SourceUserId";
 	public static readonly string TargetUserIdColumnName = "TargetUserId";
 	public static readonly string LinkColumnName = "Link";
+	public static readonly string CreationDateColumnName = "CreationDate";
 }

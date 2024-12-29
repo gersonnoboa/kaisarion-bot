@@ -18,16 +18,16 @@ public class AddInteraction(ILogger logger)
 		}
 		else
 		{
-			await SaveUrlToDatabaseAsync(chatId, url, user);
+			await SaveUrlToDatabase(chatId, url, user);
 		}
 
 	}
 
-	private async Task SaveUrlToDatabaseAsync(string chatId, string url, User sourceUser)
+	private async Task SaveUrlToDatabase(string chatId, string url, User sourceUser)
 	{
 		var databaseHandler = new DatabaseHandler(logger);
 		var targetUser = TargetUser(sourceUser);
-		var result = await databaseHandler.AddToDatabase(url, sourceUser, targetUser);
+		var result = await databaseHandler.Insert(url, sourceUser, targetUser);
 
 		if (result)
 		{

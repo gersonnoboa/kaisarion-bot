@@ -44,12 +44,12 @@ public class InteractionRunner(HttpRequest request, ILogger logger)
 
 				case var t when text.StartsWith("/vergerson", StringComparison.OrdinalIgnoreCase):
 					var viewInteractionGerson = new ViewInteraction(logger);
-					await viewInteractionGerson.Run(chatId, t, User.Gerson);
+					await viewInteractionGerson.Run(chatId, User.Gerson);
 					break;
 
 				case var t when text.StartsWith("/verjaje", StringComparison.OrdinalIgnoreCase):
 					var viewInteractionJaje = new ViewInteraction(logger);
-					await viewInteractionJaje.Run(chatId, t, User.Jaje);
+					await viewInteractionJaje.Run(chatId, User.Jaje);
 					break;
 
 				default:
