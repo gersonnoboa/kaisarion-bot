@@ -59,7 +59,7 @@ public class InteractionRunner(HttpRequest request, ILogger logger)
 		}
 		else if (root.TryGetProperty("callback_query", out var callbackQuery))
 		{
-			var callbackData = callbackQuery.GetProperty("data").GetString();
+			var callbackData = callbackQuery.GetProperty("data").GetString() ?? throw new Exception();
 
 			if (callbackData.StartsWith("delete_id_", StringComparison.OrdinalIgnoreCase))
 			{

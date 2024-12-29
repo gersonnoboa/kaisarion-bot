@@ -1,3 +1,4 @@
+using System.Dynamic;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -11,12 +12,14 @@ public class TelegramApi(ILogger logger)
 		string botToken = Environment.GetEnvironmentVariable("KAISARION_BOT_AUTH_TOKEN") ?? throw new Exception();
 		string url = $"https://api.telegram.org/bot{botToken}/sendMessage";
 
-		var payload = new
+		dynamic payload = new ExpandoObject();
+		payload.chat_id = chatId;
+		payload.text = messageText;
+
+		if (replyMarkup != null)
 		{
-			chat_id = chatId,
-			text = messageText,
-			reply_markup = replyMarkup
-		};
+			payload.reply_markup = replyMarkup;
+		}
 
 		string payloadJson = JsonSerializer.Serialize(payload);
 
