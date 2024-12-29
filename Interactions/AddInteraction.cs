@@ -23,20 +23,37 @@ public class AddInteraction(ILogger logger)
 
 	}
 
-	private async Task SaveUrlToDatabaseAsync(string chatId, string url, User user)
+	private async Task SaveUrlToDatabaseAsync(string chatId, string url, User sourceUser)
 	{
 		var databaseHandler = new DatabaseHandler(logger);
-		var result = await databaseHandler.AddToDatabase(url, user.ChatId);
+		var targetUser = TargetUser(sourceUser);
+		var result = await databaseHandler.AddToDatabase(url, sourceUser, targetUser);
 
 		if (result)
 		{
-			var messageToSend = $"URL guardada: '{url}', para user '{user.Name}'";
+			var messageToSend = $"URL guardada: '{url}' de user {sourceUser.Name} para user {targetUser.Name}.";
 			await MessageSender.Send(chatId, messageToSend, logger);
 		}
 		else
 		{
 			var messageToSend = $"Error guardando URL.";
 			await MessageSender.Send(chatId, messageToSend, logger);
+		}
+	}
+
+	private User TargetUser(User sourceUser)
+	{
+		if (sourceUser.ChatId == User.Gerson.ChatId)
+		{
+			return User.Jaje;
+		}
+		else if (sourceUser.ChatId == User.Jaje.ChatId)
+		{
+			return User.Gerson;
+		}
+		else
+		{
+			return User.Unknown;
 		}
 	}
 }

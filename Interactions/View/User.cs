@@ -6,12 +6,13 @@ public class User
 	public string Name { get; private set; }
 
 	public static User Gerson => new("5172080", "Gerson");
-	public static User Jaje => new("", "Jaje");
-
+	public static User Jaje => new("113190984", "Jaje");
+	public static User Unknown => new("", "");
 	public static User From(string id)
 	{
 		if (id == Gerson.ChatId) return Gerson;
-		else return Jaje;
+		else if (id == Jaje.ChatId) return Jaje;
+		else return Unknown;
 	}
 }
 
