@@ -68,5 +68,28 @@ class DatabaseHandler(ILogger logger)
 			return null;
 		}
 	}
+
+	public async Task<bool> Delete(string id)
+	{
+		try
+		{
+			using var connection = new SqlConnection(ConnectionString);
+			await connection.OpenAsync();
+
+			var query = $"DELETE FROM [dbo].[{Links.Name}]"
+			+ $" WHERE [{Links.IdColumnName}] = @{Links.IdColumnName};";
+
+			using var command = new SqlCommand(query, connection);
+			command.Parameters.AddWithValue($"@{Links.IdColumnName}", id);
+
+			var rowsAffected = await command.ExecuteNonQueryAsync();
+			return rowsAffected > 0;
+		}
+		catch (Exception ex)
+		{
+			logger.LogWarning($"Error deleting from database: {ex.Message}");
+			return false;
+		}
+	}
 }
 

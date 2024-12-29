@@ -11,28 +11,35 @@ public class ViewInteraction(ILogger logger)
 		var databaseHandler = new DatabaseHandler(logger);
 		var result = await databaseHandler.Select(targetUser);
 
-		if (result is not null)
-		{
-			foreach (var link in result)
-			{
-				var keyboard = new
-				{
-					inline_keyboard = new[]
-					{
-						new[]
-						{
-							new { text = "Delete", callback_data = $"delete_id_{link.Id}" },
-						}
-					}
-				};
+		var telegramApi = new TelegramApi(logger);
 
-				await MessageSender.Send(chatId, link.Link, logger, keyboard);
-			}
-		}
-		else
+		if (result is null)
 		{
 			var messageToSend = $"Error obteniendo URLs.";
-			await MessageSender.Send(chatId, messageToSend, logger);
+			await telegramApi.Send(chatId, messageToSend);
+			return;
+		}
+
+		if (result.Count == 0)
+		{
+			await telegramApi.Send(chatId, "No hay links.");
+			return;
+		}
+
+		foreach (var link in result)
+		{
+			var keyboard = new
+			{
+				inline_keyboard = new[]
+				{
+					new[]
+					{
+						new { text = "Borrar", callback_data = $"delete_id_{link.Id}" },
+					}
+				}
+			};
+
+			await telegramApi.Send(chatId, link.Link, keyboard);
 		}
 	}
 }

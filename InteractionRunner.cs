@@ -57,6 +57,19 @@ public class InteractionRunner(HttpRequest request, ILogger logger)
 					break;
 			}
 		}
+		else if (root.TryGetProperty("callback_query", out var callbackQuery))
+		{
+			var callbackData = callbackQuery.GetProperty("data").GetString();
+
+			if (callbackData.StartsWith("delete_id_", StringComparison.OrdinalIgnoreCase))
+			{
+				var idToDelete = callbackData["delete_id_".Length..];
+				var chatId = callbackQuery.GetProperty("message").GetProperty("chat").GetProperty("id").GetRawText();
+				var messageId = callbackQuery.GetProperty("message").GetProperty("message_id").GetRawText();
+
+				await DeleteInteraction.Run(chatId, messageId, idToDelete, logger);
+			}
+		}
 		else
 		{
 			logger.LogWarning("No 'message' property in the webhook payload.");

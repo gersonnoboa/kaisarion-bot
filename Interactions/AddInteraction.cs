@@ -14,7 +14,8 @@ public class AddInteraction(ILogger logger)
 		if (string.IsNullOrEmpty(url))
 		{
 			var messageToSend = "Tienes que poner una URL luego de /agregar. Ejemplo: /agregar https://...";
-			await MessageSender.Send(chatId, messageToSend, logger);
+			var telegramApi = new TelegramApi(logger);
+			await telegramApi.Send(chatId, messageToSend, logger);
 		}
 		else
 		{
@@ -29,15 +30,17 @@ public class AddInteraction(ILogger logger)
 		var targetUser = TargetUser(sourceUser);
 		var result = await databaseHandler.Insert(url, sourceUser, targetUser);
 
+		var telegramApi = new TelegramApi(logger);
+
 		if (result)
 		{
 			var messageToSend = $"URL guardada: '{url}' de user {sourceUser.Name} para user {targetUser.Name}.";
-			await MessageSender.Send(chatId, messageToSend, logger);
+			await telegramApi.Send(chatId, messageToSend, logger);
 		}
 		else
 		{
 			var messageToSend = $"Error guardando URL.";
-			await MessageSender.Send(chatId, messageToSend, logger);
+			await telegramApi.Send(chatId, messageToSend, logger);
 		}
 	}
 
