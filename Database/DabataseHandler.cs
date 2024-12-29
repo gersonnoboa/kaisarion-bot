@@ -50,6 +50,7 @@ class DatabaseHandler(ILogger logger)
 			using var command = new SqlCommand(query, connection);
 			command.Parameters.AddWithValue($"@{LinksTable.TargetUserIdColumnName}", targetUser.ChatId);
 
+			logger.LogWarning(command.CommandText);
 			using var reader = await command.ExecuteReaderAsync();
 			var result = new List<string>();
 			while (await reader.ReadAsync())
