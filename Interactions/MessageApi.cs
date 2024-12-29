@@ -15,6 +15,7 @@ public class TelegramApi(ILogger logger)
 		dynamic payload = new ExpandoObject();
 		payload.chat_id = chatId;
 		payload.text = messageText;
+		payload.parse_mode = "Markdown";
 
 		if (replyMarkup != null)
 		{
