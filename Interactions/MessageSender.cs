@@ -6,7 +6,7 @@ namespace KaisarionBot.Interactions;
 
 public class MessageSender
 {
-	public static async Task Send(string chatId, string messageText, ILogger logger)
+	public static async Task Send(string chatId, string messageText, ILogger logger, object? replyMarkup = null)
 	{
 		string botToken = Environment.GetEnvironmentVariable("KAISARION_BOT_AUTH_TOKEN") ?? throw new Exception();
 		string url = $"https://api.telegram.org/bot{botToken}/sendMessage";
@@ -14,7 +14,8 @@ public class MessageSender
 		var payload = new
 		{
 			chat_id = chatId,
-			text = messageText
+			text = messageText,
+			reply_markup = replyMarkup
 		};
 
 		string payloadJson = JsonSerializer.Serialize(payload);
@@ -24,7 +25,8 @@ public class MessageSender
 
 		if (response.IsSuccessStatusCode)
 		{
-			logger.LogWarning($"Message {messageText} sent successfully.");
+			logger.LogWarning($"Message {messageText} sent successfully");
+			logger.LogWarning($"Payload JSON: {payloadJson}");
 		}
 		else
 		{

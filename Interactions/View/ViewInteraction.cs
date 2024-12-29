@@ -13,8 +13,21 @@ public class ViewInteraction(ILogger logger)
 
 		if (result is not null)
 		{
-			var messageToSend = "URLs: \n\n" + String.Join("\n", [.. result]);
-			await MessageSender.Send(chatId, messageToSend, logger);
+			foreach (var link in result)
+			{
+				var keyboard = new
+				{
+					inline_keyboard = new[]
+					{
+						new[]
+						{
+							new { text = "Delete", callback_data = $"delete_id_{link.Id}" },
+						}
+					}
+				};
+
+				await MessageSender.Send(chatId, link.Link, logger, keyboard);
+			}
 		}
 		else
 		{

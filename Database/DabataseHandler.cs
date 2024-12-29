@@ -16,14 +16,14 @@ class DatabaseHandler(ILogger logger)
 			using var connection = new SqlConnection(ConnectionString);
 			await connection.OpenAsync();
 
-			var query = $"INSERT INTO [dbo].[{LinksTable.Name}]"
-			+ $" ([{LinksTable.SourceUserIdColumnName}], [{LinksTable.TargetUserIdColumnName}], [{LinksTable.LinkColumnName}])"
-			+ $" VALUES (@{LinksTable.SourceUserIdColumnName}, @{LinksTable.TargetUserIdColumnName}, @{LinksTable.LinkColumnName});";
+			var query = $"INSERT INTO [dbo].[{Links.Name}]"
+			+ $" ([{Links.SourceUserIdColumnName}], [{Links.TargetUserIdColumnName}], [{Links.LinkColumnName}])"
+			+ $" VALUES (@{Links.SourceUserIdColumnName}, @{Links.TargetUserIdColumnName}, @{Links.LinkColumnName});";
 
 			using var command = new SqlCommand(query, connection);
-			command.Parameters.AddWithValue($"@{LinksTable.SourceUserIdColumnName}", sourceUser.ChatId);
-			command.Parameters.AddWithValue($"@{LinksTable.TargetUserIdColumnName}", targetUser.ChatId);
-			command.Parameters.AddWithValue($"@{LinksTable.LinkColumnName}", url);
+			command.Parameters.AddWithValue($"@{Links.SourceUserIdColumnName}", sourceUser.ChatId);
+			command.Parameters.AddWithValue($"@{Links.TargetUserIdColumnName}", targetUser.ChatId);
+			command.Parameters.AddWithValue($"@{Links.LinkColumnName}", url);
 
 			await command.ExecuteNonQueryAsync();
 			return true;
@@ -35,27 +35,28 @@ class DatabaseHandler(ILogger logger)
 		}
 	}
 
-	public async Task<List<string>?> Select(User targetUser)
+	public async Task<List<Links>?> Select(User targetUser)
 	{
 		try
 		{
 			using var connection = new SqlConnection(ConnectionString);
 			await connection.OpenAsync();
 
-			var query = $"SELECT [{LinksTable.LinkColumnName}]"
-			+ $" FROM [dbo].[{LinksTable.Name}]"
-			+ $" WHERE [{LinksTable.TargetUserIdColumnName}] = @{LinksTable.TargetUserIdColumnName}"
-			+ $" ORDER BY [{LinksTable.CreationDateColumnName}] ASC";
+			var query = $"SELECT [{Links.IdColumnName}], [{Links.LinkColumnName}]"
+			+ $" FROM [dbo].[{Links.Name}]"
+			+ $" WHERE [{Links.TargetUserIdColumnName}] = @{Links.TargetUserIdColumnName}"
+			+ $" ORDER BY [{Links.CreationDateColumnName}] ASC";
 
 			using var command = new SqlCommand(query, connection);
-			command.Parameters.AddWithValue($"@{LinksTable.TargetUserIdColumnName}", targetUser.ChatId);
+			command.Parameters.AddWithValue($"@{Links.TargetUserIdColumnName}", targetUser.ChatId);
 
-			logger.LogWarning(command.CommandText);
 			using var reader = await command.ExecuteReaderAsync();
-			var result = new List<string>();
+			var result = new List<Links>();
 			while (await reader.ReadAsync())
 			{
-				result.Add(reader.GetString(0));
+				var id = reader.GetInt32(0);
+				var link = reader.GetString(1);
+				result.Add(new Links(id, link));
 			}
 
 			return result;
@@ -63,17 +64,9 @@ class DatabaseHandler(ILogger logger)
 		}
 		catch (Exception ex)
 		{
-			logger.LogWarning($"Error writing to database: {ex.Message}");
+			logger.LogWarning($"Error reading from database: {ex.Message}");
 			return null;
 		}
 	}
 }
 
-class LinksTable
-{
-	public static readonly string Name = "Links";
-	public static readonly string SourceUserIdColumnName = "SourceUserId";
-	public static readonly string TargetUserIdColumnName = "TargetUserId";
-	public static readonly string LinkColumnName = "Link";
-	public static readonly string CreationDateColumnName = "CreationDate";
-}
