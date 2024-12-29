@@ -34,7 +34,7 @@ public class ViewInteraction(ILogger logger)
 				{
 					new[]
 					{
-						new { text = "Delete", callback_data = $"delete_id_{link.Id}" },
+						new { text = "Borrar", callback_data = $"delete_id_{link.Id}" },
 					}
 				}
 			};
