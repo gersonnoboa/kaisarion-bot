@@ -9,11 +9,29 @@ class DatabaseHandler(ILogger logger)
 	private readonly string TableName = "Links";
 	private readonly string ConnectionString = Environment.GetEnvironmentVariable("KAISARION_BOT_CONNECTION_STRING") ?? throw new Exception();
 
+	private static SqlRetryLogicBaseProvider RetryLogicProvider
+	{
+		get
+		{
+			var options = new SqlRetryLogicOption()
+			{
+				NumberOfTries = 5,
+				DeltaTime = TimeSpan.FromSeconds(1),
+				MaxTimeInterval = TimeSpan.FromSeconds(20)
+			};
+
+			var provider = SqlConfigurableRetryFactory.CreateExponentialRetryProvider(options);
+
+			return provider;
+		}
+	}
+
 	public async Task<bool> Insert(string url, User sourceUser, User targetUser)
 	{
 		try
 		{
 			using var connection = new SqlConnection(ConnectionString);
+			connection.RetryLogicProvider = RetryLogicProvider;
 			await connection.OpenAsync();
 
 			var query = $"INSERT INTO [dbo].[{Links.Name}]"
@@ -40,6 +58,7 @@ class DatabaseHandler(ILogger logger)
 		try
 		{
 			using var connection = new SqlConnection(ConnectionString);
+			connection.RetryLogicProvider = RetryLogicProvider;
 			await connection.OpenAsync();
 
 			var query = $"SELECT [{Links.IdColumnName}], [{Links.LinkColumnName}]"
@@ -74,6 +93,7 @@ class DatabaseHandler(ILogger logger)
 		try
 		{
 			using var connection = new SqlConnection(ConnectionString);
+			connection.RetryLogicProvider = RetryLogicProvider;
 			await connection.OpenAsync();
 
 			var query = $"DELETE FROM [dbo].[{Links.Name}]"
