@@ -37,7 +37,7 @@ public class AddInteraction(ILogger logger)
 			var messageToSend = "URL guardada.";
 			await telegramApi.Send(chatId, messageToSend, logger);
 
-			var notificationMessage = $"{sourceUser.Name} te ha enviado un link.";
+			var notificationMessage = $"{sourceUser.Name} te ha enviado un link: {url}.";
 			await telegramApi.Send(targetUser.ChatId, notificationMessage, logger);
 		}
 		else
